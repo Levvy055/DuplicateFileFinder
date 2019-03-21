@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +26,11 @@ namespace DuplicateFileFinder.Views
         {
             this.DataContext = new ShowResultsViewModel();
             InitializeComponent();
+        }
+
+        public void ApplyResults(Results results)
+        {
+            Debug.WriteLine(results.SameNames.Count + " |||| " + results.SameSizes.Count);
         }
     }
 }

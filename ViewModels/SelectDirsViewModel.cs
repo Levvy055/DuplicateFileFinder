@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Mime;
@@ -44,34 +45,24 @@ namespace DuplicateFileFinder.ViewModels
             };
 
             _finder.DoWork += Find;
-            _analyzer.DoWork += Analyze;
-
+            _finder.WorkerReportsProgress = true;
+            _finder.ProgressChanged += (sender, args) => ProgressOfFinder = args.ProgressPercentage;
             _finder.RunWorkerCompleted += (sender, args) =>
             {
                 _analyzer.RunWorkerAsync(args.Result);
             };
+
+            _analyzer.DoWork += Analyze;
+            _analyzer.WorkerReportsProgress = true;
+            _analyzer.ProgressChanged += (sender, args) => ProgressOfAnalyzer = args.ProgressPercentage;
             _analyzer.RunWorkerCompleted += (sender, args) =>
             {
                 _findingRunning = false;
                 if (args.Cancelled) { return; }
                 var mw = Application.Current.MainWindow as MainWindow;
-                // mw.ShowResultsWindow.ApplyResults(); TODO: create
+                mw?.ShowResultsWindow.ApplyResults(args.Result as Results);
                 mw?.GoTo(mw.ShowResultsWindow);
             };
-
-            _finder.ProgressChanged += (sender, args) => ProgressOfFinder = args.ProgressPercentage;
-            _analyzer.ProgressChanged += (sender, args) => ProgressOfAnalyzer = args.ProgressPercentage;
-            _finder.WorkerReportsProgress = true;
-            _analyzer.WorkerReportsProgress = true;
-
-            
-        }
-
-        private void Analyze(object sender, DoWorkEventArgs e)
-        {
-            var files = e.Argument as List<FileData>;
-
-            e.Cancel = false;
         }
 
         private void Find(object sender, DoWorkEventArgs e)
@@ -84,13 +75,45 @@ namespace DuplicateFileFinder.ViewModels
                 allFiles.AddRange(Directory.GetFiles(dir).Select(filePath =>
                 {
                     _finder.ReportProgress(i++);
-                    Thread.Sleep(500);
                     return new FileData(new FileInfo(filePath));
                 }));
             }
 
             e.Cancel = false;
             e.Result = allFiles;
+        }
+
+        private void Analyze(object sender, DoWorkEventArgs e)
+        {
+            var files = e.Argument as List<FileData>;
+            var res = new Results();
+            var sameNames = files?.GroupBy(fd => fd.FileName);
+            if (sameNames != null)
+            {
+                foreach (var sameName in sameNames)
+                {
+                    res.SameNames.Add(sameName.Key, sameName.ToList());
+                }
+            }
+            else
+            {
+                Debug.WriteLine("No same names");
+            }
+            var sameSizes = files?.GroupBy(fd => fd.Size);
+            if (sameSizes != null)
+            {
+                foreach (var sameSize in sameSizes)
+                {
+                    res.SameSizes.Add(sameSize.Key, sameSize.ToList());
+                }
+            }
+            else
+            {
+                Debug.WriteLine("No same sizes");
+            }
+
+            e.Cancel = false;
+            e.Result = res;
         }
 
         private void OnAddExecute(object obj)
