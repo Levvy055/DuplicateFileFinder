@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -11,6 +12,10 @@ namespace DuplicateFileFinder
     {
         private readonly Action<object> _executeAction;
         private readonly Func<object, bool> _canExecuteAction;
+
+        public DelegateCommand(Action<object> executeAction) :
+            this(executeAction, o => true)
+        { }
 
         public DelegateCommand(Action<object> executeAction, Func<object, bool> canExecuteAction)
         {

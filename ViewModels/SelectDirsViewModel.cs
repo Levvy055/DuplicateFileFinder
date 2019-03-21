@@ -5,9 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Net.Mime;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Documents;
 using System.Windows.Input;
 using DuplicateFileFinder.Annotations;
 using DuplicateFileFinder.Data;
@@ -21,10 +24,17 @@ namespace DuplicateFileFinder.ViewModels
         private readonly DelegateCommand _commandAdd;
         private readonly DelegateCommand _commandFind;
         private readonly DelegateCommand _commandClear;
+        private bool _findingRunning;
+        private readonly BackgroundWorker _finder = new BackgroundWorker();
+        private readonly BackgroundWorker _analyzer = new BackgroundWorker();
+        private int _progressF;
+        private int _progressA;
+        private int _progressFmax = 100;
+        private int _progressAmax = 100;
 
         public SelectDirsViewModel()
         {
-            _commandAdd = new DelegateCommand(OnAddExecute, CanExecuteAdd);
+            _commandAdd = new DelegateCommand(OnAddExecute);
             _commandFind = new DelegateCommand(OnFindExecute, CanExecuteFind);
             _commandClear = new DelegateCommand(OnClearExecute, CanExecuteClear);
 
@@ -32,11 +42,55 @@ namespace DuplicateFileFinder.ViewModels
             {
                 OnPropertyChanged(nameof(Directories));
             };
+
+            _finder.DoWork += Find;
+            _analyzer.DoWork += Analyze;
+
+            _finder.RunWorkerCompleted += (sender, args) =>
+            {
+                _analyzer.RunWorkerAsync(args.Result);
+            };
+            _analyzer.RunWorkerCompleted += (sender, args) =>
+            {
+                _findingRunning = false;
+                if (args.Cancelled) { return; }
+                var mw = Application.Current.MainWindow as MainWindow;
+                // mw.ShowResultsWindow.ApplyResults(); TODO: create
+                mw?.GoTo(mw.ShowResultsWindow);
+            };
+
+            _finder.ProgressChanged += (sender, args) => ProgressOfFinder = args.ProgressPercentage;
+            _analyzer.ProgressChanged += (sender, args) => ProgressOfAnalyzer = args.ProgressPercentage;
+            _finder.WorkerReportsProgress = true;
+            _analyzer.WorkerReportsProgress = true;
+
+            
         }
 
-        private bool CanExecuteAdd(object arg)
+        private void Analyze(object sender, DoWorkEventArgs e)
         {
-            return true;
+            var files = e.Argument as List<FileData>;
+
+            e.Cancel = false;
+        }
+
+        private void Find(object sender, DoWorkEventArgs e)
+        {
+            var list = Directories.Select(dd => dd.FullPath).ToList();
+            var allFiles = new List<FileData>();
+            var i = 0;
+            foreach (var dir in list)
+            {
+                allFiles.AddRange(Directory.GetFiles(dir).Select(filePath =>
+                {
+                    _finder.ReportProgress(i++);
+                    Thread.Sleep(500);
+                    return new FileData(new FileInfo(filePath));
+                }));
+            }
+
+            e.Cancel = false;
+            e.Result = allFiles;
         }
 
         private void OnAddExecute(object obj)
@@ -66,8 +120,10 @@ namespace DuplicateFileFinder.ViewModels
 
         private void OnFindExecute(object obj)
         {
-            var mw = Application.Current.MainWindow as MainWindow;
-            mw?.GoTo(mw.ShowResultsWindow);
+            FindingIsRunning = true;
+            _progressAmax = (int)Directories.Select(dd => dd.Files).Sum();
+            _progressFmax = _progressAmax;
+            _finder.RunWorkerAsync();
         }
 
         private bool CanExecuteClear(object arg)
@@ -84,6 +140,36 @@ namespace DuplicateFileFinder.ViewModels
         public ICommand CommandAdd => _commandAdd;
         public ICommand CommandFind => _commandFind;
         public ICommand CommandClear => _commandClear;
+
+        public bool FindingIsRunning
+        {
+            get => _findingRunning;
+            set => SetProperty(ref _findingRunning, value);
+        }
+
+        public int ProgressOfFinder
+        {
+            get => _progressF;
+            set => SetProperty(ref _progressF, value);
+        }
+
+        public int ProgressFinderMax
+        {
+            get => _progressFmax;
+            set => SetProperty(ref _progressFmax, value);
+        }
+
+        public int ProgressAnalyzerMax
+        {
+            get => _progressAmax;
+            set => SetProperty(ref _progressAmax, value);
+        }
+
+        public int ProgressOfAnalyzer
+        {
+            get => _progressA;
+            set => SetProperty(ref _progressA, value);
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

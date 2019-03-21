@@ -11,8 +11,12 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid ShowGridLines="True" UseLayoutRounding="True">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+    <Grid UseLayoutRounding="False">
         <Grid.RowDefinitions>
+            <RowDefinition />
             <RowDefinition />
             <RowDefinition />
             <RowDefinition />
@@ -34,13 +38,14 @@
             Grid.ColumnSpan="3"
             Margin="25"
             Background="#FF03168D"
-            BorderBrush="#8904105B" ItemsSource="{Binding Directories}">
+            BorderBrush="#8904105B"
+            ItemsSource="{Binding Directories}">
             <ListView.View>
-                <GridView >
-                    <GridViewColumn DisplayMemberBinding="{Binding Id}" Header="Id"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding DirectoryName}" Header="Directory Name"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding Files}" Header="Files Count"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding FullPath}" Header="Full Path"/>
+                <GridView>
+                    <GridViewColumn DisplayMemberBinding="{Binding Id}" Header="Id" />
+                    <GridViewColumn DisplayMemberBinding="{Binding DirectoryName}" Header="Directory Name" />
+                    <GridViewColumn DisplayMemberBinding="{Binding Files}" Header="Files Count" />
+                    <GridViewColumn DisplayMemberBinding="{Binding FullPath}" Header="Full Path" />
                 </GridView>
             </ListView.View>
         </ListView>
@@ -66,5 +71,59 @@
             Margin="10"
             Command="{Binding CommandClear, Mode=OneWay}"
             Content="Clear" />
+        <Label
+            Grid.Row="5"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            VerticalAlignment="Bottom"
+            HorizontalContentAlignment="Center"
+            Content="Files scanned"
+            Visibility="{Binding FindingIsRunning, Converter={StaticResource BoolToVis}}" />
+        <Label
+            Grid.Row="5"
+            Grid.Column="2"
+            Grid.ColumnSpan="2"
+            VerticalAlignment="Bottom"
+            HorizontalContentAlignment="Center"
+            Content="Files Analyzed"
+            Visibility="{Binding FindingIsRunning, Converter={StaticResource BoolToVis}}" />
+        <Grid
+            Grid.Row="6"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            MinHeight="30"
+            Margin="15"
+            Visibility="{Binding FindingIsRunning, Converter={StaticResource BoolToVis}}">
+            <ProgressBar
+                x:Name="Pb1"
+                MinHeight="20"
+                IsIndeterminate="True"
+                Maximum="{Binding ProgressFinderMax}"
+                Minimum="0"
+                Value="{Binding ProgressOfFinder}" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Text="{Binding ElementName=Pb1, Path=Value, StringFormat={}{0:0} files found}" />
+        </Grid>
+        <Grid
+            Grid.Row="6"
+            Grid.Column="2"
+            Grid.ColumnSpan="2"
+            MinHeight="30"
+            Margin="15"
+            Visibility="{Binding FindingIsRunning, Converter={StaticResource BoolToVis}}">
+            <ProgressBar
+                x:Name="Pb2"
+                MinHeight="20"
+                IsIndeterminate="True"
+                Maximum="{Binding ProgressAnalyzerMax}"
+                Minimum="0"
+                Value="{Binding ProgressOfAnalyzer}" />
+            <TextBlock
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Text="{Binding ElementName=Pb2, Path=Value, StringFormat={}{0:0} files analyzed}" />
+        </Grid>
     </Grid>
 </UserControl>
