@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using DuplicateFileFinder.ViewModels;
 
 namespace DuplicateFileFinder.Views
@@ -11,10 +12,22 @@ namespace DuplicateFileFinder.Views
         public MainWindow()
         {
             InitializeComponent();
+
             SelectDirsWindow = new SelectDirs();
-            this.Content = SelectDirsWindow;
+            ShowResultsWindow = new ShowResults();
+
+            GoTo(SelectDirsWindow);
+        }
+
+        public void GoTo(UserControl control)
+        {
+            if (control != null && (control == SelectDirsWindow || control == ShowResultsWindow))
+            {
+                this.Content = control;
+            }
         }
 
         public SelectDirs SelectDirsWindow { get; }
+        public ShowResults ShowResultsWindow { get; }
     }
 }
