@@ -22,15 +22,19 @@ namespace DuplicateFileFinder.Views
     /// </summary>
     public partial class ShowResults : UserControl
     {
+        private readonly ShowResultsViewModel _viewModel;
+
         public ShowResults()
         {
-            this.DataContext = new ShowResultsViewModel();
+            _viewModel = new ShowResultsViewModel();
+            this.DataContext = _viewModel;
             InitializeComponent();
         }
 
         public void ApplyResults(Results results)
         {
-            Debug.WriteLine(results.SameNames.Count + " |||| " + results.SameSizes.Count);
+            _viewModel.ApplyResults(results);
+
         }
     }
 }

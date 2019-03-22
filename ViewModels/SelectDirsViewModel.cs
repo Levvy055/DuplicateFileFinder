@@ -4,14 +4,8 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Mime;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using DuplicateFileFinder.Annotations;
 using DuplicateFileFinder.Data;
@@ -57,12 +51,18 @@ namespace DuplicateFileFinder.ViewModels
             _analyzer.ProgressChanged += (sender, args) => ProgressOfAnalyzer = args.ProgressPercentage;
             _analyzer.RunWorkerCompleted += (sender, args) =>
             {
-                _findingRunning = false;
+                FindingIsRunning = false;
                 if (args.Cancelled) { return; }
                 var mw = Application.Current.MainWindow as MainWindow;
                 mw?.ShowResultsWindow.ApplyResults(args.Result as Results);
                 mw?.GoTo(mw.ShowResultsWindow);
             };
+
+#if DEBUG
+            Directories.Add(new DirectoryData(new DirectoryInfo("C:\\Users\\lluka\\Documents\\temp\\png")));
+            Directories.Add(new DirectoryData(new DirectoryInfo("C:\\Users\\lluka\\Documents\\temp\\png2")));
+            OnFindExecute(null);
+#endif
         }
 
         private void Find(object sender, DoWorkEventArgs e)
@@ -86,31 +86,7 @@ namespace DuplicateFileFinder.ViewModels
         private void Analyze(object sender, DoWorkEventArgs e)
         {
             var files = e.Argument as List<FileData>;
-            var res = new Results();
-            var sameNames = files?.GroupBy(fd => fd.FileName);
-            if (sameNames != null)
-            {
-                foreach (var sameName in sameNames)
-                {
-                    res.SameNames.Add(sameName.Key, sameName.ToList());
-                }
-            }
-            else
-            {
-                Debug.WriteLine("No same names");
-            }
-            var sameSizes = files?.GroupBy(fd => fd.Size);
-            if (sameSizes != null)
-            {
-                foreach (var sameSize in sameSizes)
-                {
-                    res.SameSizes.Add(sameSize.Key, sameSize.ToList());
-                }
-            }
-            else
-            {
-                Debug.WriteLine("No same sizes");
-            }
+            var res=FileComparer.CompareFiles(files);
 
             e.Cancel = false;
             e.Result = res;

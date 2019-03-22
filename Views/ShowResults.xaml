@@ -11,20 +11,53 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Grid >
+    <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
         </Grid.RowDefinitions>
+        <Label
+            Grid.ColumnSpan="2"
+            Margin="135,10,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Content="Same Names" />
+        <Label
+            Grid.Row="0"
+            Grid.Column="3"
+            Grid.ColumnSpan="2"
+            Margin="135,10,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Content="Same Sizes" />
+        <Button Content="Go Back" Grid.Column="2" Grid.Row="4" Command="{Binding CommandAdd, Mode=OneWay}" />
+        <ScrollViewer
+            Grid.Row="1"
+            Grid.RowSpan="4"
+            Grid.Column="0"
+            Grid.ColumnSpan="2">
+            <ListView ItemsSource="{Binding SameNames}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <local:FileResult Title="{Binding Count, Mode=TwoWay}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </ScrollViewer>
+        <ScrollViewer
+            Grid.Row="1"
+            Grid.RowSpan="4"
+            Grid.Column="3"
+            Grid.ColumnSpan="2" />
     </Grid>
 </UserControl>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,8 +10,8 @@ namespace DuplicateFileFinder
 {
     public class Results
     {
-        public Dictionary<string, List<FileData>> SameNames { get; } = new Dictionary<string, List<FileData>>();
-        public Dictionary<long, List<FileData>> SameSizes { get; } = new Dictionary<long, List<FileData>>();
+        public ObservableCollection<ObservableCollection<FileData>> SameNames { get; } = new ObservableCollection<ObservableCollection<FileData>>();
+        public ObservableCollection<ObservableCollection<FileData>> SameSizes { get; } = new ObservableCollection<ObservableCollection<FileData>>();
 
     }
 }

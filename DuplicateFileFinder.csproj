@@ -38,6 +38,9 @@
     <StartupObject>DuplicateFileFinder.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Magick.NET-Q8-AnyCPU, Version=7.11.0.0, Culture=neutral, PublicKeyToken=2004825badfa91ec, processorArchitecture=MSIL">
+      <HintPath>packages\Magick.NET-Q8-AnyCPU.7.11.0\lib\net40\Magick.NET-Q8-AnyCPU.dll</HintPath>
+    </Reference>
     <Reference Include="MaterialDesignColors, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\MaterialDesignColors.1.1.3\lib\net45\MaterialDesignColors.dll</HintPath>
     </Reference>
@@ -70,16 +73,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Bhattacharyya.cs" />
     <Compile Include="Data\DirectoryData.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="FileComparer.cs" />
+    <Compile Include="ImageHashing.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Results.cs" />
     <Compile Include="ViewModels\ShowResultsViewModel.cs" />
+    <Compile Include="Views\FileResult.xaml.cs">
+      <DependentUpon>FileResult.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SelectDirs.xaml.cs">
       <DependentUpon>SelectDirs.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ShowResults.xaml.cs">
       <DependentUpon>ShowResults.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\FileResult.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
