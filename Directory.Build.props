@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- Allows building Windows-targeted projects on non-Windows platforms -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+</Project>
